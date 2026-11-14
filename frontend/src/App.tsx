@@ -1,6 +1,6 @@
-import { useState } from 'react'
 import { Link, Route, Routes } from 'react-router-dom'
 
+import { SESSION_USERS, setSession, useSession } from './stores/session'
 import Overview from './views/Overview'
 import ChannelView from './views/channel'
 import CampaignView from './views/campaign'
@@ -24,7 +24,7 @@ import OpsalertView from './views/opsalert'
 const navItems = [{ label: "运营概览", path: "/" }, { label: "渠道管理", path: "/channel" }, { label: "投放活动", path: "/campaign" }, { label: "触点追踪", path: "/touchpoint" }, { label: "归因分析", path: "/attribution" }, { label: "ROI评估", path: "/roi" }, { label: "转化漏斗", path: "/conversion" }, { label: "用户路径", path: "/userpath" }, { label: "留存分析", path: "/retention" }, { label: "事件定义", path: "/eventdef" }, { label: "用户画像", path: "/profile" }, { label: "热力分析", path: "/heatmap" }, { label: "竞品对标", path: "/benchmark" }, { label: "数据审计", path: "/auditcheck" }, { label: "分流配置", path: "/abgroup" }, { label: "可视化配置", path: "/dataviz" }, { label: "舆情分析", path: "/sentiment" }, { label: "生命周期", path: "/lifecycle" }, { label: "运营预警", path: "/opsalert" }]
 
 export default function App() {
-  const [operator] = useState('值班管理员')
+  const operator = useSession()
 
   return (
     <div className="app-shell">
@@ -41,7 +41,25 @@ export default function App() {
       <main className="app-main">
         <header className="app-head">
           <span className="head-desc">面向数据产品运营、渠道归因、用户行为分析、ROI评估、转化优化与数据应用监控的数据分析工程平台。</span>
-          <span className="head-user">当前值班：{operator}</span>
+          <span className="head-user">
+            当前操作人：
+            <select
+              className="user-switch"
+              value={operator.name}
+              onChange={(event) => {
+                const next = SESSION_USERS.find((user) => user.name === event.target.value)
+                if (next) {
+                  setSession(next)
+                }
+              }}
+            >
+              {SESSION_USERS.map((user) => (
+                <option key={user.name} value={user.name}>
+                  {user.name}（{user.role}）
+                </option>
+              ))}
+            </select>
+          </span>
         </header>
         <Routes>
           <Route path="/" element={<Overview />} />
